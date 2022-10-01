@@ -1,0 +1,70 @@
+---
+title: "607 Assignment 4"
+author: "Neil Hodgkinson"
+date: "2022-10-01"
+output: html_document
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyr)
+library(dplyr)
+library(readr)
+
+urlfile="https://raw.githubusercontent.com/Nhodgkinson/607A4/main/Airline%20Info.csv"
+
+mydata<-read_csv(url(urlfile))
+
+```
+
+
+```{r tidywork}
+df<-gather(mydata, "location", "n", 3:7)
+
+df<-df[!is.na(df$n),] #Remove NA values from the "n" column
+
+df<-df %>% fill(...1) #fill in NA rows in column 1 with value above
+
+df$x <- paste(df$...1,df$...2)#Concatenating column 1 and 2 into a new column to use later
+
+adf<-subset(df, select= c(3,5,4))#new dataframe that is a subset of relevant data. Location, n, and x
+
+adf<-spread(adf, x, n)# this takes the x column and tidy's it into columns using n as the value
+
+
+```
+
+
+```{r analysis}
+
+#using group_by and summarise to output mean and sum by location
+df %>% group_by(location) %>%
+  summarise(mean= mean(n), sum =sum(n))
+
+
+#using the tidy df and creating new columns 
+adf$total <- rowSums(adf[2:5])
+adf$avg <- rowMeans(adf[2:5])
+adf
+
+
+#Here I have the mean of Alaska and AM West columns being displayed individually
+print("Number of delayed Alaska flights: ") 
+mean(adf$`ALASKA delayed`)
+print("Number of on time Alaska flights: ") 
+mean(adf$`ALASKA on time`)
+print("Number of delayed AM West flights: ") 
+mean(adf$`AM WEST delayed`)
+print("Number of on time AM West flights: ") 
+mean(adf$`AM WEST on time`)
+
+#I would like to know which airline has a higher ratio of on time flights
+
+adf$AR <-  (AR = adf$`ALASKA on time`/adf$`ALASKA delayed`)
+adf$AMR <- (AMR = adf$`AM WEST on time`/adf$`AM WEST delayed`)
+adf$avg_AR<-mean(adf$AR)
+adf$avg_AMR<-mean(adf$AMR)
+
+#Alaska has the higher ratio of on time flights with a ratio of 9.6 compared to AM West with a ratio of 5.8
+
+```
